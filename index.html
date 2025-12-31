@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mahin's Classroom - Invoice Generator</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+    <div class="container">
+        <div class="input-form">
+            <h2>📝 Invoice Details</h2>
+
+            <fieldset>
+                <legend>Customer Information</legend>
+                <label for="customerName">Customer Name:</label>
+                <input type="text" id="customerName" required>
+
+                <label for="customerPhone">Phone Number:</label>
+                <input type="tel" id="customerPhone" required>
+            </fieldset>
+
+            <fieldset>
+                <legend>Product Details</legend>
+                <div id="product-list">
+                    </div>
+                <button type="button" id="addProductBtn" class="secondary-btn">+ Add Product</button>
+            </fieldset>
+
+            <fieldset>
+                <legend>Payment Information</legend>
+                <label for="paymentMethod">Payment Method:</label>
+                <select id="paymentMethod">
+                    <option value="Cash">Cash</option>
+                    <option value="Bkash">Bkash</option>
+                    <option value="Nagad">Nagad</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+
+                <label for="transactionId">Transaction ID (Optional):</label>
+                <input type="text" id="transactionId">
+            </fieldset>
+
+            <button type="button" id="generateInvoiceBtn">✨ Generate Invoice</button>
+        </div>
+
+        <div class="invoice-preview">
+            <h2>📄 Invoice Preview</h2>
+            <div id="invoice-template">
+                </div>
+            
+            <div class="action-buttons">
+                <button type="button" id="saveAsImageBtn" class="action-btn" disabled>🖼️ Save as Image</button>
+                <button type="button" id="saveAsPdfBtn" class="action-btn" disabled>💾 Save as PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
