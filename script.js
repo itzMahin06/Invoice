@@ -119,9 +119,9 @@ function generateInvoiceTemplate() {
             <td>${index + 1}</td>
             <td>${item.name}</td>
             <td class="text-center">${item.qty}</td>
-            <td class="text-right">${CURRENCY} ${item.price}</td>
+            <td class="text-right"> ${item.price}</td>
             <td class="text-center">${item.discountRate.toFixed(0)}%</td>
-            <td class="text-right">${CURRENCY} ${item.lineTotalAfterDiscount}</td>
+            <td class="text-right"> ${item.lineTotalAfterDiscount}</td>
         </tr>
     `).join('');
 
@@ -166,9 +166,9 @@ function generateInvoiceTemplate() {
                         <th style="width: 5%;">#</th>
                         <th style="width: 35%;">Description</th>
                         <th style="width: 10%;" class="text-center">Qty</th>
-                        <th style="width: 15%;" class="text-right">Unit Price</th>
+                        <th style="width: 15%;" class="text-right">Unit Price (${CURRENCY})</th>
                         <th style="width: 15%;" class="text-center">Discount</th>
-                        <th style="width: 20%;" class="text-right">Net Total</th>
+                        <th style="width: 20%;" class="text-right">Net Total (${CURRENCY})</th>
                     </tr>
                 </thead>
                 <tbody>
