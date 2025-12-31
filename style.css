@@ -79,10 +79,11 @@ input:focus, select:focus {
     outline: none;
 }
 
-/* Product List Styling */
+/* Product List Styling (UPDATED for Discount column) */
 .product-row {
     display: grid;
-    grid-template-columns: 3fr 1fr 1fr 50px; /* Name, Qty, Price, Delete */
+    /* Name, Qty, Price, Discount, Delete */
+    grid-template-columns: 3fr 1fr 1fr 1fr 50px; 
     gap: 10px;
     align-items: center;
     margin-bottom: 10px;
@@ -163,24 +164,23 @@ button {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     min-height: 500px;
     position: relative;
-    overflow: hidden; /* Important for watermark */
+    overflow: hidden; 
 }
 
-/* Watermark */
-#invoice-template::before {
-    content: '';
+/* NEW HTML Watermark Style for better export */
+.invoice-watermark {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgw_5wvBB4GUpJ3a2QyLxt_YwpHOlB0fU_RTJIlGqYZqGDmvgDvMlURYvgbI6hdiWbU3JhMkUNUUA35xydMa7pe5UVdf6IoIiuW0fGVHS-gez2ckD-ij8wdF_2l-Qz846Ct59hVD1z6aBPMxJty5xXPcykITtVrTPYiyIIk9qaWIHNwZ-KQ27T-h0-ClUI/s1600/%E0%A6%B6%E0%A6%BF%E0%A6%96%E0%A7%8B%20%E0%A6%8F%E0%A6%AC%E0%A6%82%20%E0%A6%85%E0%A6%A8%E0%A7%8D%E0%A6%AC%E0%A7%87%E0%A6%B7%E0%A6%A3%20%E0%A6%95%E0%A6%B0%E0%A7%8B_20260101_024044_0000.png'); /* Watermark link */
+    background-image: url('https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgw_5wvBB4GUpJ3a2QyLxt_YwpHOlB0fU_RTJIlGqYZqGDmvgDvMlURYvgbI6hdiWbU3JhMkUNUUA35xydMa7pe5UVdf6IoIiuW0fGVHS-gez2ckD-ij8wdF_2l-Qz846Ct59hVD1z6aBPMxJty5xXPcykITtVrTPYiyIIk9qaWIHNwZ-KQ27T-h0-ClUI/s1600/%E0%A6%B6%E0%A6%BF%E0%A6%96%E0%A7%8B%20%E0%A6%8F%E0%A6%AC%E0%A6%82%20%E0%A6%85%E0%A6%A8%E0%A7%8D%E0%A6%AC%E0%A7%87%E0%A6%B7%E0%A6%A3%20%E0%A6%95%E0%A6%B0%E0%A7%8B_20260101_024044_0000.png'); 
     background-repeat: no-repeat;
     background-position: center;
     background-size: 80%;
-    opacity: 0.05; /* Very subtle */
+    opacity: 0.05; 
     z-index: 0;
-    pointer-events: none; /* Allows content interaction */
+    pointer-events: none; 
 }
 
 /* Invoice Content Styling (High-level classes) */
@@ -256,6 +256,10 @@ button {
     background-color: #f8f9fa;
 }
 
+/* Alignment helper classes for the table */
+.text-center { text-align: center !important; }
+.text-right { text-align: right !important; }
+
 /* Summary Section */
 .invoice-summary {
     display: flex;
@@ -264,7 +268,7 @@ button {
 }
 
 .summary-box {
-    width: 300px;
+    width: 350px; /* Slightly wider to fit discount labels */
     border: 2px solid var(--primary-color);
     border-radius: 5px;
 }
