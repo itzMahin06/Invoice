@@ -130,7 +130,7 @@ function generateInvoiceTemplate() {
 
         <div class="invoice-header">
             <div class="company-info">
-                <img src="${COMPANY_LOGO}" alt="${COMPANY_NAME} Logo">
+                
                 <h1>${COMPANY_NAME}</h1>
             </div>
             <div class="invoice-meta">
