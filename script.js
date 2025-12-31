@@ -17,7 +17,7 @@ const CURRENCY = "৳"; // Bangladeshi Taka symbol
 // --- Functions for Product Management ---
 
 /**
- * Creates an HTML element for a single product row input.
+ * Creates an HTML element for a single product row input, now including discount.
  */
 function createProductRow() {
     const row = document.createElement('div');
@@ -25,7 +25,8 @@ function createProductRow() {
     row.innerHTML = `
         <input type="text" placeholder="Product/Service Description" class="product-name" required>
         <input type="number" placeholder="Qty" class="product-qty" min="1" value="1" required>
-        <input type="number" placeholder="Price (${CURRENCY})" class="product-price" min="0" required>
+        <input type="number" placeholder="Unit Price (${CURRENCY})" class="product-price" min="0" required>
+        <input type="number" placeholder="Discount (%)" class="product-discount" min="0" max="100" value="0">
         <button type="button" class="remove-product-btn">X</button>
     `;
 
@@ -65,19 +66,36 @@ function generateInvoiceTemplate() {
     }
 
     const products = [];
-    let subTotal = 0;
+    let subTotal = 0; // Total before any discounts
+    let totalDiscount = 0;
 
-    // 1. Collect Product Data and Calculate Subtotal
+    // 1. Collect Product Data and Calculate Totals
     const productRows = productListDiv.querySelectorAll('.product-row');
     productRows.forEach(row => {
         const name = row.querySelector('.product-name').value.trim();
         const qty = parseInt(row.querySelector('.product-qty').value);
         const price = parseFloat(row.querySelector('.product-price').value);
-        
+        // Ensure discount rate is between 0 and 100
+        const discountPercentage = Math.min(100, Math.max(0, parseFloat(row.querySelector('.product-discount').value)));
+        const discountRate = discountPercentage / 100;
+
         if (name && qty > 0 && price >= 0) {
-            const total = qty * price;
-            subTotal += total;
-            products.push({ name, qty, price: price.toFixed(2), total: total.toFixed(2) });
+            const lineTotalBeforeDiscount = qty * price;
+            const lineDiscountAmount = lineTotalBeforeDiscount * discountRate;
+            const lineTotalAfterDiscount = lineTotalBeforeDiscount - lineDiscountAmount;
+
+            subTotal += lineTotalBeforeDiscount; 
+            totalDiscount += lineDiscountAmount;
+
+            products.push({
+                name,
+                qty,
+                price: price.toFixed(2),
+                discountRate: discountPercentage,
+                lineTotalBeforeDiscount: lineTotalBeforeDiscount.toFixed(2),
+                lineDiscountAmount: lineDiscountAmount.toFixed(2),
+                lineTotalAfterDiscount: lineTotalAfterDiscount.toFixed(2)
+            });
         }
     });
 
@@ -86,27 +104,30 @@ function generateInvoiceTemplate() {
         return;
     }
 
-    // 2. Define Summary Calculations (Example: 0% Tax, 0 BDT Discount for simplicity)
+    // 2. Define Summary Calculations
     const taxRate = 0.00; // 0%
-    const taxAmount = subTotal * taxRate;
-    const discount = 0.00;
-    const grandTotal = subTotal + taxAmount - discount;
+    const subTotalAfterDiscount = subTotal - totalDiscount;
+    const taxAmount = subTotalAfterDiscount * taxRate;
+    const grandTotal = subTotalAfterDiscount + taxAmount;
 
     const invoiceNumber = 'INV-' + new Date().getTime().toString().slice(-6);
     const invoiceDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
-    // 3. Construct the Invoice HTML
+    // 3. Construct the Invoice HTML (Watermark added as a direct element)
     let itemsTable = products.map((item, index) => `
         <tr>
             <td>${index + 1}</td>
             <td>${item.name}</td>
             <td class="text-center">${item.qty}</td>
             <td class="text-right">${CURRENCY} ${item.price}</td>
-            <td class="text-right">${CURRENCY} ${item.total}</td>
+            <td class="text-center">${item.discountRate.toFixed(0)}%</td>
+            <td class="text-right">${CURRENCY} ${item.lineTotalAfterDiscount}</td>
         </tr>
     `).join('');
 
     const templateHTML = `
+        <div class="invoice-watermark"></div>
+
         <div class="invoice-header">
             <div class="company-info">
                 <img src="${COMPANY_LOGO}" alt="${COMPANY_NAME} Logo">
@@ -143,10 +164,11 @@ function generateInvoiceTemplate() {
                 <thead>
                     <tr>
                         <th style="width: 5%;">#</th>
-                        <th style="width: 50%;">Description</th>
-                        <th style="width: 15%;" class="text-center">Qty</th>
+                        <th style="width: 35%;">Description</th>
+                        <th style="width: 10%;" class="text-center">Qty</th>
                         <th style="width: 15%;" class="text-right">Unit Price</th>
-                        <th style="width: 15%;" class="text-right">Total</th>
+                        <th style="width: 15%;" class="text-center">Discount</th>
+                        <th style="width: 20%;" class="text-right">Net Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -157,8 +179,8 @@ function generateInvoiceTemplate() {
 
         <div class="invoice-summary">
             <div class="summary-box">
-                <div class="summary-row"><span>Subtotal:</span><span>${CURRENCY} ${subTotal.toFixed(2)}</span></div>
-                <div class="summary-row"><span>Discount:</span><span>${CURRENCY} ${discount.toFixed(2)}</span></div>
+                <div class="summary-row"><span>Subtotal (Before Discount):</span><span>${CURRENCY} ${subTotal.toFixed(2)}</span></div>
+                <div class="summary-row"><span>Total Discount:</span><span>${CURRENCY} ${totalDiscount.toFixed(2)}</span></div>
                 <div class="summary-row"><span>Tax (${(taxRate * 100).toFixed(0)}%):</span><span>${CURRENCY} ${taxAmount.toFixed(2)}</span></div>
                 <div class="summary-row"><span>GRAND TOTAL:</span><span>${CURRENCY} ${grandTotal.toFixed(2)}</span></div>
             </div>
@@ -169,7 +191,7 @@ function generateInvoiceTemplate() {
                 <strong>Payment Method:</strong> ${paymentMethod}
                 ${transactionId ? ` | <strong>Transaction ID:</strong> ${transactionId}` : ''}
             </div>
-            <p>Thank you for your business with ${COMPANY_NAME}!</p>
+            <p>Thank you • ${COMPANY_NAME}!</p>
         </div>
     `;
 
@@ -204,32 +226,28 @@ saveAsImageBtn.addEventListener('click', () => {
 
 
 /**
- * Saves the invoice as a PDF. Requires jsPDF and html2canvas.
+ * Saves the invoice as a PDF, scaled to fit on a single A4 page. Requires jsPDF and html2canvas.
  */
 saveAsPdfBtn.addEventListener('click', () => {
-    // We use html2canvas to render the HTML, then jsPDF to create the document
     const { jsPDF } = window.jspdf;
     
-    html2canvas(invoiceTemplateDiv, { scale: 2, logging: false }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4'); // 'p' for portrait, 'mm' for units, 'a4' size
-        const imgWidth = 210; // A4 width in mm
-        const pageHeight = 295; // A4 height in mm
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        let heightLeft = imgHeight;
-        let position = 0;
+    // Scale higher for better resolution in PDF
+    html2canvas(invoiceTemplateDiv, { scale: 3, logging: false }).then(canvas => {
+        const imgData = canvas.toDataURL('image/jpeg', 1.0); 
+        const pdf = new jsPDF('p', 'mm', 'a4'); 
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth(); // 210 mm
+        
+        // Calculate the height the image should take to maintain aspect ratio, scaled to PDF width
+        const imgCanvasWidth = canvas.width;
+        const imgCanvasHeight = canvas.height;
+        const ratio = pdfWidth / imgCanvasWidth;
+        const finalImgHeight = imgCanvasHeight * ratio;
 
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-
-        // If content is longer than one page, add new pages
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
-
+        // Add the image to the PDF
+        // Parameters: (Image Data, Format, X position, Y position, Width, Height)
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, finalImgHeight);
+        
         pdf.save(`Invoice_${document.getElementById('customerName').value || 'New'}.pdf`);
     }).catch(error => {
         console.error("PDF generation failed:", error);
